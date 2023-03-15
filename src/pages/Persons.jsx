@@ -3,8 +3,9 @@ import { TableContainer, TableRow, Table, TableCell, TableBody, TableHead } from
 //import persons from  '../data/users.json'
 import PersonRow from '../components/PersonRow'
 import PersonForm from '../components/PersonForm'
-import firebaseDb from  '../util/firebase'
-import { collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore"
+//import firebaseDb from  '../util/firebase'
+//import { collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore"
+import  axios from '../util/axios'
 
 
 function Persons() {
@@ -17,12 +18,17 @@ function Persons() {
     ) )
   }
 
-  const getPersons = async () => {
-    const personCollection =  collection(firebaseDb, 'persons')
+  const getPersons =  () => {
+    /*const personCollection =  collection(firebaseDb, 'persons')
     const personCursor = await getDocs(personCollection)
     //const persons =  personCursor.docs.map(doc => doc.data())
+  */ 
+    axios.get("/persons")
+      .then((response) => {
+        setPersonsList(response.data)
+      })
 
-    setPersonsList(personCursor.docs.map(doc => doc.data()))
+    //setPersonsList(personCursor.docs.map(doc => doc.data()))
 
     //return persons
   }
@@ -30,30 +36,43 @@ function Persons() {
   useEffect(() => { getPersons() }, [])
   
   const handleAddPerson = (person) => {
-/*     let personsTmp = [...personsList]
+     //let personsTmp = [...personsList]
 
      if(person.id === ""){
         person.id =  Math.floor(Math.random()*100000)
-        personsTmp.push(person)
+        //personsTmp.push(person)
+        axios.post("/persons", person)
+        .then((res)=> { 
+            if(res.status === 201) {
+              getPersons()
+            }
+           })
      }else{
-        const indice = personsTmp.findIndex((item) => item.id === person.id)
-        personsTmp[indice] = person
+        /* const indice = personsTmp.findIndex((item) => item.id === person.id)
+        personsTmp[indice] = person */
+        axios.put("/persons/"+person.id, person)
+        .then((res)=> { 
+            if(res.status === 200) {
+              getPersons()
+            }
+           })
      }
 
-     setPersonsList(personsTmp)
-    */
-    if(person.id === "")
+     //setPersonsList(personsTmp)
+    
+ /*   if(person.id === "")
         person.id =  Math.floor(Math.random()*100000)
 
     setDoc(doc(firebaseDb, "persons", person.id+""), person)
           .then(()=> {
             getPersons()
            })
-          
+  */        
   }
 
   const handleDelete = (person) => {
-    deleteDoc(doc(firebaseDb,"persons", person.id))
+    //deleteDoc(doc(firebaseDb,"persons", person.id))
+    axios.delete("/persons/"+person.id)
        .then(()=> {
         getPersons()
        })
@@ -65,7 +84,7 @@ function Persons() {
     setPersonEdit(person)
   }
 
-  getPersons()
+
   return (
     <div>
         <PersonForm addPerson={handleAddPerson} personEdit={personEdit}></PersonForm>
